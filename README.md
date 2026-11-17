@@ -1,55 +1,54 @@
-# dag-layout-engine
+# @trysac/dag-layout-engine
 
-[![npm version](https://img.shields.io/npm/v/@trysac/dag-layout-engine.svg)](https://www.npmjs.com/package/@trysac/dag-layout-engine)
-[![license: MIT](https://img.shields.io/npm/l/@trysac/dag-layout-engine.svg)](LICENSE)
-[![CI](https://github.com/Trysac/u911-dag-layout-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Trysac/u911-dag-layout-engine/actions/workflows/ci.yml)
+Deterministic Sugiyama layered graph layout written by hand: cycle removal, longest-path layering, barycenter plus adjacent-swap crossing reduction, overlap-free coordinate assignment and standalone SVG output.
 
-Sugiyama layered graph layout written by hand: cycle removal, longest-path layers, barycenter crossing reduction, overlap-free coordinates and SVG output
+## The Problem
 
-## Problem
+Diagrams of pipelines, dependencies and state machines need a layered layout, and the usual JavaScript options are large, unmaintained or hide which heuristic produced a crossing. A small, deterministic implementation of the classic Sugiyama phases, with crossing counts exposed and no node overlaps guaranteed, lets tools render readable graphs to SVG and test the result exactly.
 
-Describe in two or three sentences the concrete problem this utility solves, who hits it, and why existing
-packages do not solve it well. Keep it factual; link to an issue or decision record when there is one.
+## Installation
 
-## Install
-
-```sh
+```bash
 npm install @trysac/dag-layout-engine
 ```
-
-Requires Node.js 20 or newer. The package ships ES modules with TypeScript declarations.
 
 ## Usage
 
 ```ts
-import { greet } from "@trysac/dag-layout-engine";
+import { countCrossings, layout, toSvg } from "@trysac/dag-layout-engine";
 
-// Build a greeting; surrounding whitespace is ignored.
-const message = greet("  Ada ");
-console.log(message); // "Hello, Ada!"
-
-try {
-  greet("   ");
-} catch (error) {
-  console.error((error as Error).message); // "name must not be empty"
-}
+const res = layout({
+  nodes: [{ id: "a", width: 40, height: 20 }, { id: "b", width: 40, height: 20 }],
+  edges: [{ from: "a", to: "b" }],
+});
+console.log(countCrossings(res), toSvg(res));
 ```
 
-## API
+## Public API
 
-| Export | Signature | Description |
-|---|---|---|
-| `greet` | `(name: string) => string` | Placeholder API; replace it with the real one. |
+### `layout(graph, opts?)`
 
-## Development
+Computes a layout. 
+- `graph`: `{ nodes: { id: string; width: number; height: number; label?: string }[]; edges: { from: string; to: string }[] }`.
+- `opts`: `{ direction?: 'TB' | 'LR'; rankSep?: number; nodeSep?: number; sweeps?: number; maxNodes?: number; maxEdges?: number }`.
 
-```sh
-npm install
-npm run check   # lint, format, types, tests with coverage, docs, secrets
-```
+### `countCrossings(layout)`
 
-See [AGENTS.md](AGENTS.md) for the full command list and [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
+Counts edge segment crossings between adjacent layers.
 
-## License
+### `toSvg(layout)`
 
-[MIT](LICENSE) © 2026 Miguel Gomez
+Generates SVG markup for the computed layout.
+
+### Errors & Limits
+
+- `LayoutError`: Thrown for `duplicate_node`, `unknown_node`, `self_loop`, `invalid_size`, `invalid_option`, `too_large`.
+- Limits: `maxNodes` (default 2,000), `maxEdges` (default 10,000), `dummyNodes` (hard cap 100,000).
+
+## Why not @dagrejs/dagre?
+
+This utility is smaller, maintained, deterministic, exposes crossing counts explicitly, and guarantees no overlaps by construction, whereas legacy engines often hide the heuristic steps.
+
+## Security
+
+See [docs/SECURITY.md](docs/SECURITY.md).

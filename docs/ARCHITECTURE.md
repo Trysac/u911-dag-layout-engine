@@ -1,30 +1,11 @@
 # Architecture
 
-## Overview
+`@trysac/dag-layout-engine` implements the five classic Sugiyama layered graph layout phases deterministically and iteratively without runtime dependencies.
 
-`@trysac/dag-layout-engine` is a small, dependency-free TypeScript library published to npm as ES modules with type
-declarations. Sugiyama layered graph layout written by hand: cycle removal, longest-path layers, barycenter crossing reduction, overlap-free coordinates and SVG output
+## Pipeline Phases
 
-## Modules
-
-| Module | Responsibility |
-|---|---|
-| `src/index.ts` | Public API. Everything consumers import is exported from here. |
-
-Add a row when you add a module. Internal modules are not re-exported unless they are part of the public API.
-
-## Boundaries
-
-- No runtime dependencies by default; any addition is justified in [STACK.md](STACK.md).
-- No I/O at import time. Functions are pure unless their documentation says otherwise.
-- Errors are thrown as built-in error types (`TypeError`, `RangeError`) with actionable messages.
-
-## Build and distribution
-
-`npm run build` compiles `src/` to `dist/` with `tsconfig.build.json`. Only `dist/` is published
-(`files` in `package.json`).
-
-## Decisions
-
-Architectural decisions are recorded in [decisions/](decisions/), starting with
-[0001](decisions/0001-record-architecture-decisions.md).
+1. **Cycle Removal**: Iterative depth-first search over nodes in input order and outgoing edges in edge input order. Any edge leading to a vertex currently on the active DFS stack is marked as reversed so the working graph is a DAG.
+2. **Layering**: Longest-path layering from sources via topological order. Source nodes are placed at layer `0`, and every other node is placed at `1 + max(predecessor.layer)`.
+3. **Normalisation**: Edges spanning `k > 1` layers are split into `k` unit-length segments separated by `k - 1` zero-size (`width: 0, height: 0`) dummy vertices.
+4. **Ordering (Crossing Reduction)**: Initial order per layer preserves real nodes in input order followed by dummy vertices in edge input order. The engine runs `sweeps` iterations alternating downward and upward passes using barycenter ordering (mean position of neighbors in the adjacent fixed layer) followed by adjacent-swap transpose while swaps strictly reduce crossings, retaining the best ordering observed.
+5. **Coordinate Assignment**: Within each layer, vertices are initially packed left-to-right with `nodeSep` gaps, refined over 4 alternating downward and upward median-alignment sweeps that enforce `max(target, prevRight + nodeSep + width / 2)` so overlaps are impossible by construction, and shifted so the minimum left edge is `0`.
