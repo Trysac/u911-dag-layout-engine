@@ -1,33 +1,31 @@
-# Project record: dag-layout-engine
+# Project
 
 ## Objective
 
-Sugiyama layered graph layout written by hand: cycle removal, longest-path layers, barycenter crossing reduction, overlap-free coordinates and SVG output
-
-State the measurable outcome this utility must deliver and who it is for.
+Provide a small, deterministic, zero-dependency implementation of the Sugiyama layered graph layout algorithm with explicit crossing counts, guaranteed non-overlapping node placement, and standalone SVG rendering.
 
 ## Scope
 
-In scope:
+- Cycle removal, longest-path layering, normalization, ordering (crossing reduction), and coordinate assignment.
+- Input of directed graphs, SVG export, and crossing validation.
 
-- The public API documented in the README.
+## Out of Scope
 
-Out of scope:
+- Edge labels, ports, clusters and subgraphs.
+- Advanced ranking heuristics like network-simplex.
+- Incremental layout, splines, or automatic arrowhead generation.
 
-- List what this utility deliberately does not do.
+## Factory run u911 (measured from API usage)
 
-## Timeline
+| Date (UTC) | Phase | Model | Batch | Input | Output | Cache write | Cache read | Cost (USD) |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-10 | generation | google/gemini-4-argon | yes | 6119 | 21490 | 0 | 0 | 0.4543 |
+| 2026-11-11 | fix-1 | google/gemini-3.8-flash | no | 853177 | 6099 | 0 | 1301717 | 0.7604 |
+| 2026-11-11 | fix-2 | google/gemini-3.8-flash | no | 531172 | 3125 | 0 | 1244460 | 0.5034 |
+| 2026-11-11 | fix-3 | google/gemini-3.8-flash | no | 843117 | 4412 | 0 | 1486868 | 0.7604 |
+| 2026-11-11 | fix-4 | google/gemini-3.8-flash | no | 859830 | 4103 | 0 | 1557006 | 0.7770 |
+| 2026-11-17 | fix-1 | google/gemini-3.8-flash | no | 169923 | 1075 | 0 | 1579529 | 0.2499 |
+| 2026-11-17 | audit | google/gemini-3.8-flash | no | 0 | 0 | 0 | 0 | 0.0000 |
+| 2026-11-17 | docs | google/gemini-3.1-flash-lite | no | 24594 | 1338 | 0 | 0 | 0.0082 |
 
-| Date | Milestone |
-|---|---|
-| 2026 | Repository created from the factory utility template. |
-
-## Effort metrics
-
-Measured values only. Leave "pending measurement" until a real figure is recorded; never estimate here.
-
-| Metric | Value | Source |
-|---|---|---|
-| Tokens (input / output) | pending measurement | factory ledger |
-| Hours (human) | pending measurement | time log |
-| Cost (USD) | pending measurement | factory ledger |
+Total: $3.5136. Prices: vertex line, as measured by its adapter. Providers serve the current version of each model id, so the date tells which version answered; versions, launch stages and price sources per line are in the factory's model register (docs/MODELS.md).

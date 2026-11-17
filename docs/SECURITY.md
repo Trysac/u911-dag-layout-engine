@@ -1,31 +1,14 @@
-# Security practices
+# Security & Threat Model
 
-How this repository keeps the package and its users safe. The disclosure policy is in
-[../SECURITY.md](../SECURITY.md).
+`@trysac/dag-layout-engine` processes untrusted graph structures and generates SVG markup.
 
-## Secrets
+## Defended Threats
 
-- No secrets, tokens or credentials in the repository, commit history, logs or prompts.
-- `gitleaks` runs as the last step of `npm run check` and as a dedicated CI job. Its configuration is
-  `.gitleaks.toml`.
-- Publishing credentials live only in the CI secret store or the maintainer's local npm configuration.
+- **Resource Exhaustion**: The engine strictly enforces `maxNodes` (default 2,000), `maxEdges` (default 10,000), and a maximum of 100,000 dummy nodes to prevent DoS. The algorithms are iterative, avoiding stack overflows on deep graphs.
+- **Injection**: `toSvg` escapes `&`, `<`, `>`, `"`, and `'` characters in node labels and IDs.
+- **Reporting**: All runtime errors use `LayoutError` with truncated messages (max 200 chars) to prevent resource amplification.
 
-## Dependencies
+## Not Defended
 
-- Runtime dependencies are avoided; development dependencies are limited to the toolchain listed in
-  [STACK.md](STACK.md).
-- Dependabot opens weekly updates for npm packages and GitHub Actions.
-- Commit the generated `package-lock.json` so installs are reproducible.
-
-## Code
-
-- No `eval`, dynamic `Function` construction or shelling out from library code.
-- Inputs from callers are validated and rejected with explicit errors.
-- The `security` step of `npm run check` runs ESLint with eslint-plugin-security only (Biome stays the
-  linter). Its configuration is `scripts/eslint-security.config.mjs`; inline `eslint-disable` comments are
-  ignored, so a finding is fixed in the code, never silenced.
-
-## Publishing
-
-- Packages are published from a clean checkout after `npm run check` passes.
-- Only `dist/` is included in the published tarball.
+- No mitigation against malicious user input that is computationally expensive but within the defined `maxNodes`/`maxEdges` limits.
+- The engine assumes the input graph structure is well-formed regarding node definitions (IDs must be non-empty strings).
