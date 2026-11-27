@@ -8,9 +8,15 @@ Diagrams of pipelines, dependencies and state machines need a layered layout, an
 
 ## Installation
 
-```bash
-npm install @trysac/dag-layout-engine
+Not published to npm yet. Build it from a clone, then install it from the local path:
+
+```sh
+git clone https://github.com/Trysac/u911-dag-layout-engine.git
+cd u911-dag-layout-engine && npm ci && npm run build
+cd ../your-project && npm install ../u911-dag-layout-engine
 ```
+
+Imports keep the package name: `import { ... } from "@trysac/dag-layout-engine"`.
 
 ## Usage
 
